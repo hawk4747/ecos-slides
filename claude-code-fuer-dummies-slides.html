@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code für Dummies — Slides</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Montserrat:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0f0f; overflow: hidden; cursor: default; }
+.slide {
+  width: 100vw; height: 100vh; display: none;
+  flex-direction: column; justify-content: center; align-items: center;
+  background: #0d1117;
+  background-image:
+    linear-gradient(rgba(46,163,165,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(46,163,165,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  padding: 60px 100px;
+  position: relative; overflow: hidden;
+  opacity: 0; transition: opacity 0.25s ease;
+}
+.slide.active { display: flex; opacity: 1; }
+.nav-arrow {
+  position: fixed; top: 50%; transform: translateY(-50%);
+  font-size: 48px; color: rgba(255,255,255,0.5);
+  cursor: pointer; z-index: 100; user-select: none;
+  font-family: 'Montserrat', sans-serif; font-weight: 300;
+  width: 56px; height: 56px; display: flex;
+  align-items: center; justify-content: center;
+  border-radius: 50%; background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: all 0.2s ease;
+}
+.nav-arrow:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8); }
+.nav-left { left: 24px; }
+.nav-right { right: 24px; }
+.nav-dots {
+  position: fixed; bottom: 28px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 10px; z-index: 100;
+}
+.dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(255,255,255,0.15); cursor: pointer;
+  transition: all 0.2s ease;
+}
+.dot.active { background: #2ee6c8; width: 28px; border-radius: 5px; }
+.dot:hover { background: rgba(255,255,255,0.3); }
+
+/* Shared typography */
+.slide-title {
+  font-family: 'DM Serif Display', serif;
+  font-style: italic;
+  font-size: 64px;
+  color: #fff;
+  text-align: center;
+  margin-bottom: 48px;
+  line-height: 1.2;
+}
+.slide-title span { color: #2ee6c8; }
+.slide-subtitle {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  color: rgba(255,255,255,0.4);
+  text-align: center;
+  margin-bottom: 56px;
+  letter-spacing: 1px;
+}
+
+/* Card containers */
+.card-grid {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 1400px;
+  width: 100%;
+}
+.card {
+  background: rgba(13,20,30,0.8);
+  border: 1px solid rgba(46,163,165,0.15);
+  border-radius: 16px;
+  padding: 36px 40px;
+  min-width: 420px;
+  max-width: 560px;
+  flex: 1;
+}
+.card-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #2ee6c8;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.card-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: rgba(46,163,165,0.06);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 20px;
+  color: rgba(255,255,255,0.85);
+}
+.card-item .num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: rgba(46,163,165,0.6);
+  min-width: 20px;
+}
+.card-item .emoji { font-size: 24px; }
+
+/* Flowchart styles */
+.flow-container {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  max-width: 1400px;
+  width: 100%;
+}
+.flow-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 40px 36px 44px;
+  border-radius: 20px;
+  min-width: 340px;
+  max-width: 420px;
+  flex: 1;
+}
+.flow-column.col-teal { background: rgba(46,230,200,0.05); border: 1px solid rgba(46,230,200,0.18); }
+.flow-column.col-blue { background: rgba(100,181,246,0.05); border: 1px solid rgba(100,181,246,0.18); }
+.flow-column.col-green { background: rgba(0,230,118,0.05); border: 1px solid rgba(0,230,118,0.18); }
+
+.flow-col-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 24px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+.col-teal .flow-col-title { color: #2ee6c8; }
+.col-blue .flow-col-title { color: #64B5F6; }
+.col-green .flow-col-title { color: #00E676; }
+
+.flow-box {
+  padding: 18px 24px;
+  border-radius: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  text-align: center;
+  width: 100%;
+  max-width: 300px;
+  color: rgba(255,255,255,0.9);
+}
+.col-teal .flow-box { background: rgba(46,230,200,0.1); border: 1px solid rgba(46,230,200,0.25); }
+.col-blue .flow-box { background: rgba(100,181,246,0.1); border: 1px solid rgba(100,181,246,0.25); }
+.col-green .flow-box { background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.25); }
+
+.flow-arrow {
+  width: 2px;
+  height: 28px;
+  position: relative;
+  margin: 0 auto;
+}
+.col-teal .flow-arrow { background: rgba(46,230,200,0.35); }
+.col-blue .flow-arrow { background: rgba(100,181,246,0.35); }
+.col-green .flow-arrow { background: rgba(0,230,118,0.35); }
+
+.flow-arrow::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+}
+.col-teal .flow-arrow::after { border-top: 6px solid rgba(46,230,200,0.5); }
+.col-blue .flow-arrow::after { border-top: 6px solid rgba(100,181,246,0.5); }
+.col-green .flow-arrow::after { border-top: 6px solid rgba(0,230,118,0.5); }
+
+/* Stat */
+.stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+}
+.stat-block { text-align: center; }
+.stat-num {
+  font-family: 'DM Serif Display', serif;
+  font-size: 110px;
+  line-height: 1;
+}
+.stat-num.red { color: #FF5252; }
+.stat-num.green { color: #00E676; }
+.stat-num.teal { color: #2ee6c8; }
+.stat-label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 22px;
+  color: rgba(255,255,255,0.4);
+  margin-top: 8px;
+}
+.stat-vs {
+  font-family: 'DM Serif Display', serif;
+  font-size: 28px;
+  color: rgba(255,255,255,0.2);
+}
+
+/* Screenshot */
+.mock-browser {
+  width: 100%;
+  max-width: 800px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(46,163,165,0.15);
+}
+.mock-bar {
+  background: rgba(13,20,30,0.9);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mock-dots { display: flex; gap: 6px; }
+.mock-dots span { width: 10px; height: 10px; border-radius: 50%; }
+.mock-dots span:nth-child(1) { background: #FF5F57; }
+.mock-dots span:nth-child(2) { background: #FEBC2E; }
+.mock-dots span:nth-child(3) { background: #28C840; }
+.mock-url {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: rgba(255,255,255,0.3);
+  margin-left: 12px;
+}
+.mock-body {
+  background: rgba(13,20,30,0.5);
+  min-height: 360px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+.mock-hint {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 18px;
+  color: rgba(255,255,255,0.25);
+  font-style: italic;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+
+<!-- Slide 1: Claude vs. Cowork vs. Claude Code -->
+<div class="slide" id="slide-1">
+  <h1 class="slide-title">Was ist <span>Claude Code</span>?</h1>
+  <div class="flow-container">
+    <div class="flow-column col-teal">
+      <div class="flow-col-title">Claude</div>
+      <div class="flow-box">Chatbot im Browser</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-box">Frage stellen</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-box">Antwort bekommen</div>
+    </div>
+    <div class="flow-column col-blue">
+      <div class="flow-col-title">Cowork</div>
+      <div class="flow-box">Vereinfachte Oberfläche</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-box">Dateien erstellen</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-box">Einfache Aufgaben</div>
+    </div>
+    <div class="flow-column col-green">
+      <div class="flow-col-title">Claude Code</div>
+      <div class="flow-box">Agent auf deinem Computer</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-box">Apps & Systeme bauen</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-box">Volle Kontrolle</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 2: Was Claude Code kann -->
+<div class="slide" id="slide-2">
+  <h1 class="slide-title">Was <span>Claude Code</span> kann</h1>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-label">Grundlagen</div>
+      <div class="card-item"><span class="num">01</span><span class="emoji">📁</span> Dateien & Ordner erstellen</div>
+      <div class="card-item"><span class="num">02</span><span class="emoji">🌐</span> Websites & Apps bauen</div>
+      <div class="card-item"><span class="num">03</span><span class="emoji">🗄️</span> Datenbanken aufsetzen</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Advanced</div>
+      <div class="card-item"><span class="num">04</span><span class="emoji">⚡</span> Scripts schreiben & ausführen</div>
+      <div class="card-item"><span class="num">05</span><span class="emoji">🔗</span> APIs anbinden</div>
+      <div class="card-item"><span class="num">06</span><span class="emoji">🔍</span> Internet recherchieren</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 3: Automation Flow -->
+<div class="slide" id="slide-3">
+  <h1 class="slide-title"><span>Automationen</span></h1>
+  <p class="slide-subtitle">BEISPIEL: DATEN AUTOMATISCH LIEFERN</p>
+  <div class="flow-container">
+    <div class="flow-column col-teal" style="min-width: 260px;">
+      <div class="flow-col-title">Jeden Montag</div>
+      <div class="flow-box">📊 Shopify Daten ziehen</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-box">📋 Tabelle erstellen</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-box">📧 E-Mail an Steuerberater</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-box" style="background: rgba(0,230,118,0.25); font-weight: 700;">Kein manueller Schritt</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 4: AI-Automation Flow -->
+<div class="slide" id="slide-4">
+  <h1 class="slide-title"><span>AI</span>-Automationen</h1>
+  <p class="slide-subtitle">BEISPIEL: E-MAILS AUTOMATISCH VERARBEITEN</p>
+  <div class="flow-container">
+    <div class="flow-column col-teal" style="min-width: 280px;">
+      <div class="flow-col-title">AI-Pipeline</div>
+      <div class="flow-box">📨 E-Mail einlesen</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-box">🧠 AI kategorisiert</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-box">✍️ Antwort entwerfen</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-box" style="background: rgba(156,39,176,0.25); font-weight: 700;">👤 Du: Absegnen</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 5: 100 Creatives -->
+<div class="slide" id="slide-5">
+  <h1 class="slide-title">Ad-Creatives mit <span>AI</span></h1>
+  <div class="stat-row">
+    <div class="stat-block">
+      <div class="stat-num teal">100</div>
+      <div class="stat-label">Creatives</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-num" style="color: rgba(255,255,255,0.15);">=</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-num green">1</div>
+      <div class="stat-label">Befehl</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 6: Telegram Bot -->
+<div class="slide" id="slide-6">
+  <h1 class="slide-title">Dein Business als <span>Chatbot</span></h1>
+  <div class="mock-browser">
+    <div class="mock-bar">
+      <div class="mock-dots"><span></span><span></span><span></span></div>
+      <div class="mock-url">Telegram — AI-OS Bot</div>
+    </div>
+    <div class="mock-body">
+      <div class="mock-hint">Screenshot: Telegram Chat mit AI-OS Bot<br><br>Beispiel-Frage: "Wie viel Umsatz haben wir diesen Monat?"<br>Antwort mit echten Business-Daten</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 7: PandaDoc vs. Eigene App -->
+<div class="slide" id="slide-7">
+  <h1 class="slide-title">Eigene <span>Apps</span> bauen</h1>
+  <div class="stat-row">
+    <div class="stat-block">
+      <div class="stat-num red">49€</div>
+      <div class="stat-label">PandaDoc / Monat</div>
+    </div>
+    <div class="stat-vs">vs.</div>
+    <div class="stat-block">
+      <div class="stat-num green">0€</div>
+      <div class="stat-label">Eigene Signing-App</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 8: eCom AIOS Flow -->
+<div class="slide" id="slide-8">
+  <h1 class="slide-title">eCom <span>AIOS</span></h1>
+  <p class="slide-subtitle">VON DER ANFRAGE BIS ZUM ONBOARDING — AUTOMATISCH</p>
+  <div class="flow-container">
+    <div class="flow-column col-teal">
+      <div class="flow-col-title">Akquise</div>
+      <div class="flow-box">📝 Formular</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-box">🗂️ CRM-Eintrag</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-box">📞 Sales Call</div>
+    </div>
+    <div class="flow-column col-blue">
+      <div class="flow-col-title">Abschluss</div>
+      <div class="flow-box">✍️ Unterschrift</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-box">🧾 Rechnung</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-box">📧 Onboarding-Mail</div>
+    </div>
+    <div class="flow-column col-green">
+      <div class="flow-col-title">Delivery</div>
+      <div class="flow-box">💬 Slack-Channel</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-box">📋 Tasks gepostet</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-box" style="background: rgba(46,163,165,0.25); font-weight: 700;">🚀 Kunde live</div>
+    </div>
+  </div>
+</div>
+
+<div class="nav-arrow nav-left" id="nav-left">&#8249;</div>
+<div class="nav-arrow nav-right" id="nav-right">&#8250;</div>
+<div class="nav-dots" id="nav-dots"></div>
+<script>
+let current = 0;
+const slides = document.querySelectorAll('.slide');
+const dotsContainer = document.getElementById('nav-dots');
+const navLeft = document.getElementById('nav-left');
+const navRight = document.getElementById('nav-right');
+
+// Create dots
+slides.forEach((_, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'dot';
+  dot.addEventListener('click', () => show(i));
+  dotsContainer.appendChild(dot);
+});
+const dots = dotsContainer.querySelectorAll('.dot');
+
+function show(n) {
+  if (n < 0 || n >= slides.length) return;
+  slides[current].classList.remove('active');
+  dots[current].classList.remove('active');
+  current = n;
+  slides[current].classList.add('active');
+  dots[current].classList.add('active');
+  navLeft.style.opacity = current === 0 ? '0.15' : '0.5';
+  navRight.style.opacity = current === slides.length - 1 ? '0.15' : '0.5';
+}
+
+navLeft.addEventListener('click', () => show(current - 1));
+navRight.addEventListener('click', () => show(current + 1));
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); show(current - 1); }
+});
+show(0);
+</script>
+</body>
+</html>
