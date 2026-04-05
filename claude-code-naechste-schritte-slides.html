@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code — Nächste Schritte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Montserrat:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0f0f; overflow: hidden; cursor: default; }
+.slide {
+  width: 100vw; height: 100vh; display: none;
+  flex-direction: column; justify-content: center; align-items: center;
+  background: #0d1117;
+  background-image:
+    linear-gradient(rgba(46,163,165,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(46,163,165,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  padding: 60px 100px;
+  position: relative; overflow: hidden;
+  opacity: 0; transition: opacity 0.25s ease;
+}
+.slide.active { display: flex; opacity: 1; }
+.nav-arrow {
+  position: fixed; top: 50%; transform: translateY(-50%);
+  font-size: 48px; color: rgba(255,255,255,0.5);
+  cursor: pointer; z-index: 100; user-select: none;
+  font-family: 'Montserrat', sans-serif; font-weight: 300;
+  width: 56px; height: 56px; display: flex;
+  align-items: center; justify-content: center;
+  border-radius: 50%; background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: all 0.2s ease;
+}
+.nav-arrow:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8); }
+.nav-left { left: 24px; }
+.nav-right { right: 24px; }
+.nav-dots {
+  position: fixed; bottom: 28px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 10px; z-index: 100;
+}
+.dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(255,255,255,0.15); cursor: pointer;
+  transition: all 0.2s ease;
+}
+.dot.active { background: #2ee6c8; width: 28px; border-radius: 5px; }
+.dot:hover { background: rgba(255,255,255,0.3); }
+
+/* Shared typography */
+.slide-title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-style: normal;
+  font-size: 42px;
+  color: #fff;
+  text-align: center;
+  margin-bottom: 44px;
+  line-height: 1.2;
+}
+.slide-title span { color: #2ee6c8; }
+.slide-subtitle {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  color: rgba(255,255,255,0.35);
+  text-align: center;
+  margin-bottom: 36px;
+  letter-spacing: 1px;
+}
+
+/* ───────────────────────────────────────────
+   SLIDE 1 — eCom Use Cases (5-Spalten Cards)
+   ─────────────────────────────────────────── */
+.usecases-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 18px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.usecase-card {
+  background: rgba(46,163,165,0.04);
+  border: 1px solid rgba(46,163,165,0.15);
+  border-radius: 20px;
+  padding: 36px 20px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  position: relative;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  cursor: default;
+}
+
+.usecase-card:hover {
+  box-shadow: 0 0 32px rgba(46,163,165,0.18), 0 0 0 1px rgba(46,163,165,0.3);
+  border-color: rgba(46,163,165,0.3);
+}
+
+.usecase-icon-wrap {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.usecase-icon-wrap svg {
+  width: 56px;
+  height: 56px;
+}
+
+.usecase-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: rgba(46,163,165,0.5);
+  letter-spacing: 1.5px;
+  margin-bottom: 14px;
+}
+
+.usecase-label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+  line-height: 1.35;
+}
+
+/* ───────────────────────────────────────────
+   SLIDE 2 — 3-Schichten-Modell (Flow)
+   ─────────────────────────────────────────── */
+/* lf-wrap: flex-start so all items share same top edge — critical for SVG alignment */
+.lf-wrap { display: flex; align-items: flex-start; gap: 0; }
+/* lf-col uses gap instead of margin so total height is predictable */
+.lf-col { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+/* Fixed height 70px so left & right headers are identical height */
+.lf-col-header {
+  text-align: center; height: 70px;
+  display: flex; flex-direction: column; justify-content: flex-start;
+}
+.lf-col-title {
+  font-family: 'Montserrat', sans-serif; font-weight: 800;
+  font-size: 17px; color: #fff;
+}
+.lf-col-sub {
+  font-family: 'Montserrat', sans-serif; font-size: 12px;
+  color: rgba(255,255,255,0.35); margin-top: 4px; line-height: 1.4;
+}
+/* Base box: fixed 80px height, flex-centered — height is never ambiguous */
+.lf-box {
+  border-radius: 12px; padding: 0 22px;
+  font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 600;
+  text-align: center; line-height: 1.4; width: 160px;
+  height: 80px; display: flex; align-items: center; justify-content: center;
+}
+/* CLAUDE.md: 3×80 + 2×20 = 280px — matches exact rows total */
+.lf-box-teal {
+  background: rgba(46,230,200,0.10); border: 1px solid rgba(46,230,200,0.35);
+  color: #2ee6c8; height: 280px; font-size: 18px;
+}
+.lf-box-blue {
+  background: rgba(100,181,246,0.08); border: 1px solid rgba(100,181,246,0.28);
+  color: rgba(100,181,246,0.9);
+}
+.lf-box-green {
+  background: rgba(0,230,118,0.07); border: 1px solid rgba(0,230,118,0.25);
+  color: rgba(0,230,118,0.9);
+}
+/* Right block: separate Skills column + SVG arrows + Refs column */
+.lf-right { display: flex; flex-direction: column; gap: 20px; }
+.lf-right-headers { display: flex; align-items: flex-start; height: 70px; }
+.lf-right-col { width: 160px; text-align: center; }
+.lf-right-spacer { width: 120px; flex-shrink: 0; }
+.lf-right-body { display: flex; align-items: flex-start; }
+.lf-right-stack { display: flex; flex-direction: column; gap: 20px; width: 160px; }
+.lf-right-svg { flex: 0 0 120px; }
+
+/* Concentric rings for AIOS */
+.rings { position: relative; width: 600px; height: 600px; }
+.ring {
+  position: absolute; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.ring-outer {
+  width: 600px; height: 600px; top: 0; left: 0;
+  border: 1px solid rgba(46,230,200,0.1);
+  background: rgba(46,230,200,0.02);
+}
+.ring-mid {
+  width: 400px; height: 400px; top: 100px; left: 100px;
+  border: 1px solid rgba(100,181,246,0.15);
+  background: rgba(100,181,246,0.03);
+}
+.ring-inner {
+  width: 200px; height: 200px; top: 200px; left: 200px;
+  border: 2px solid rgba(46,230,200,0.3);
+  background: rgba(46,230,200,0.06);
+  box-shadow: 0 0 40px rgba(46,230,200,0.08);
+}
+.ring-text {
+  font-family: 'Montserrat', sans-serif; font-weight: 700;
+  text-align: center; position: absolute; z-index: 3;
+}
+.ring-text.center {
+  top: 200px; left: 200px;
+  width: 200px; height: 200px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: #2ee6c8; line-height: 1.3;
+}
+.ring-text.mid-label {
+  font-size: 16px; color: rgba(100,181,246,0.7);
+}
+.ring-text.outer-label {
+  font-size: 15px; color: rgba(46,230,200,0.5);
+}
+
+</style>
+</head>
+<body>
+
+<!-- Slide 1: eCom Use Cases -->
+<div class="slide" id="slide-1">
+  <h1 class="slide-title">Was du damit <span>machen kannst</span></h1>
+  <div class="usecases-grid">
+
+    <!-- Card 1: Produktuploads Shopify -->
+    <div class="usecase-card">
+      <div class="usecase-icon-wrap">
+        <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Shopping bag / Shopify icon -->
+          <rect x="10" y="20" width="36" height="28" rx="4" stroke="#2ee6c8" stroke-width="2" fill="none"/>
+          <path d="M20 20V16a8 8 0 1116 0v4" stroke="#2ee6c8" stroke-width="2" stroke-linecap="round"/>
+          <line x1="28" y1="30" x2="28" y2="38" stroke="#2ee6c8" stroke-width="2" stroke-linecap="round"/>
+          <line x1="24" y1="34" x2="32" y2="34" stroke="#2ee6c8" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="usecase-num">01</div>
+      <div class="usecase-label">Produktuploads<br>Shopify</div>
+    </div>
+
+    <!-- Card 2: Kundensupport -->
+    <div class="usecase-card">
+      <div class="usecase-icon-wrap">
+        <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Chat bubble with checkmark -->
+          <path d="M46 12H10a3 3 0 00-3 3v22a3 3 0 003 3h6v6l8-6h22a3 3 0 003-3V15a3 3 0 00-3-3z" stroke="rgba(46,230,200,0.7)" stroke-width="2" fill="none"/>
+          <polyline points="20,28 25,33 36,22" stroke="#2ee6c8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="usecase-num">02</div>
+      <div class="usecase-label">Kunden&shy;support</div>
+    </div>
+
+    <!-- Card 3: Reporting -->
+    <div class="usecase-card">
+      <div class="usecase-icon-wrap">
+        <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Bar chart -->
+          <rect x="10" y="34" width="8" height="12" rx="2" fill="rgba(46,163,165,0.2)" stroke="#2ee6c8" stroke-width="1.8"/>
+          <rect x="24" y="22" width="8" height="24" rx="2" fill="rgba(46,163,165,0.2)" stroke="#2ee6c8" stroke-width="1.8"/>
+          <rect x="38" y="12" width="8" height="34" rx="2" fill="rgba(46,163,165,0.35)" stroke="#2ee6c8" stroke-width="1.8"/>
+          <line x1="8" y1="48" x2="48" y2="48" stroke="rgba(46,163,165,0.3)" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div class="usecase-num">03</div>
+      <div class="usecase-label">Reporting</div>
+    </div>
+
+    <!-- Card 4: Klaviyo -->
+    <div class="usecase-card">
+      <div class="usecase-icon-wrap">
+        <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Email / Klaviyo waves -->
+          <rect x="8" y="14" width="40" height="28" rx="4" stroke="#2ee6c8" stroke-width="2" fill="none"/>
+          <polyline points="8,14 28,30 48,14" stroke="#2ee6c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <!-- Small lightning bolt = campaign activation -->
+          <path d="M31 34l-4 8 3-3.5h-2l4-8-3 3.5h2z" stroke="rgba(46,230,200,0.6)" stroke-width="1.4" fill="rgba(46,230,200,0.15)" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="usecase-num">04</div>
+      <div class="usecase-label">Klaviyo Analyse<br>&amp; Kampagnen</div>
+    </div>
+
+    <!-- Card 5: Kreative Konzepte / Angles / Hooks -->
+    <div class="usecase-card">
+      <div class="usecase-icon-wrap">
+        <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Lightbulb / creative concept -->
+          <path d="M28 10a14 14 0 0110 23.7V38H18v-4.3A14 14 0 0128 10z" stroke="#2ee6c8" stroke-width="2" fill="rgba(46,163,165,0.1)"/>
+          <rect x="20" y="38" width="16" height="4" rx="2" stroke="#2ee6c8" stroke-width="1.8" fill="none"/>
+          <rect x="22" y="42" width="12" height="4" rx="2" stroke="rgba(46,163,165,0.5)" stroke-width="1.5" fill="none"/>
+          <!-- inner light lines -->
+          <line x1="24" y1="26" x2="32" y2="20" stroke="rgba(46,230,200,0.5)" stroke-width="1.4" stroke-linecap="round"/>
+          <line x1="28" y1="28" x2="28" y2="22" stroke="rgba(46,230,200,0.4)" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="usecase-num">05</div>
+      <div class="usecase-label">Kreative Konzepte,<br>Angles &amp; Hooks</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Slide 2: 3-Schichten-Modell -->
+<div class="slide" id="slide-2">
+  <h2 class="slide-title">Das <span>3-Schichten-Modell</span></h2>
+  <div class="lf-wrap">
+
+    <!-- Col 1: CLAUDE.md -->
+    <div class="lf-col">
+      <div class="lf-col-header">
+        <div class="lf-col-title">Verhalten</div>
+        <div class="lf-col-sub">Jede Nachricht</div>
+      </div>
+      <div class="lf-box lf-box-teal">CLAUDE.md</div>
+    </div>
+
+    <!-- Fan SVG: margin-top=90px skips header(70)+gap(20). height=280 = 3×80+2×20.
+         CLAUDE.md center = y=140. Row centers: y=40 / y=140 / y=240 -->
+    <svg width="80" height="280" style="flex:0 0 80px; margin-top:90px; overflow:visible;">
+      <line x1="0"  y1="140" x2="40"  y2="140" stroke="rgba(46,163,165,0.4)" stroke-width="1.5"/>
+      <line x1="40" y1="40"  x2="40"  y2="240" stroke="rgba(46,163,165,0.4)" stroke-width="1.5"/>
+      <line x1="40" y1="40"  x2="80"  y2="40"  stroke="rgba(46,163,165,0.4)" stroke-width="1.5"/>
+      <line x1="40" y1="140" x2="80"  y2="140" stroke="rgba(46,163,165,0.4)" stroke-width="1.5"/>
+      <line x1="40" y1="240" x2="80"  y2="240" stroke="rgba(46,163,165,0.4)" stroke-width="1.5"/>
+      <polygon points="76,36  80,40  76,44"  fill="rgba(46,163,165,0.5)"/>
+      <polygon points="76,136 80,140 76,144" fill="rgba(46,163,165,0.5)"/>
+      <polygon points="76,236 80,240 76,244" fill="rgba(46,163,165,0.5)"/>
+    </svg>
+
+    <!-- Right: Skills-Spalte + SVG-Pfeile + Refs-Spalte -->
+    <div class="lf-right">
+      <div class="lf-right-headers">
+        <div class="lf-col-header lf-right-col">
+          <div class="lf-col-title">Workflows / Skills</div>
+          <div class="lf-col-sub">Gezielt aufgerufen</div>
+        </div>
+        <div class="lf-right-spacer"></div>
+        <div class="lf-col-header lf-right-col">
+          <div class="lf-col-title">Reference Files</div>
+          <div class="lf-col-sub">Einmal erstellen<br>Überall nutzen</div>
+        </div>
+      </div>
+      <div class="lf-right-body">
+        <!-- Skills-Spalte -->
+        <div class="lf-right-stack">
+          <div class="lf-box lf-box-blue">Produktseiten-<br>texte</div>
+          <div class="lf-box lf-box-blue">Kunden-<br>support</div>
+          <div class="lf-box lf-box-blue">Copywriting<br>Ads</div>
+        </div>
+        <!-- SVG: Pfeile zwischen Skills und Refs
+             Box 80px + Gap 20px → Zeilenmitte bei y=40, 140, 240
+             Skill 1 → Ref 1 | Skill 2 → Ref 1 | Skill 3 → Ref 1,2,3 -->
+        <svg class="lf-right-svg" width="120" height="280" viewBox="0 0 120 280">
+          <!-- Skill 1 → Ref 1 (rot, horizontal) -->
+          <path d="M 0,40 H 116" stroke="rgba(239,83,80,0.65)" stroke-width="2" fill="none"/>
+          <polygon points="112,36 120,40 112,44" fill="rgba(239,83,80,0.75)"/>
+
+          <!-- Skill 2 → Ref 1 (pink, rechts dann hoch) -->
+          <path d="M 0,140 H 60 V 50 H 116" stroke="rgba(236,64,122,0.6)" stroke-width="2" fill="none"/>
+          <polygon points="112,46 120,50 112,54" fill="rgba(236,64,122,0.7)"/>
+
+          <!-- Skill 3 → Ref 1,2,3 (orange, Fan nach rechts-oben) -->
+          <line x1="0" y1="240" x2="30" y2="240" stroke="rgba(255,167,38,0.6)" stroke-width="2"/>
+          <line x1="30" y1="60" x2="30" y2="240" stroke="rgba(255,167,38,0.6)" stroke-width="2"/>
+          <!-- → Ref 1 -->
+          <line x1="30" y1="60" x2="116" y2="60" stroke="rgba(255,167,38,0.6)" stroke-width="2"/>
+          <polygon points="112,56 120,60 112,64" fill="rgba(255,167,38,0.7)"/>
+          <!-- → Ref 2 -->
+          <line x1="30" y1="140" x2="116" y2="140" stroke="rgba(255,167,38,0.6)" stroke-width="2"/>
+          <polygon points="112,136 120,140 112,144" fill="rgba(255,167,38,0.7)"/>
+          <!-- → Ref 3 -->
+          <line x1="30" y1="240" x2="116" y2="240" stroke="rgba(255,167,38,0.6)" stroke-width="2"/>
+          <polygon points="112,236 120,240 112,244" fill="rgba(255,167,38,0.7)"/>
+        </svg>
+        <!-- Refs-Spalte -->
+        <div class="lf-right-stack">
+          <div class="lf-box lf-box-green">Produkt-<br>informationen</div>
+          <div class="lf-box lf-box-green">Zielgruppen-<br>sprache</div>
+          <div class="lf-box lf-box-green">Hooks/Angles/<br>CTAs</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="slide" id="slide-3">
+  <h1 class="slide-title">eCom <span>AI OS</span></h1>
+  <div class="rings">
+    <div class="ring ring-outer"></div>
+    <div class="ring ring-mid"></div>
+    <div class="ring ring-inner"></div>
+    <div class="ring-text center">eCom<br>AI OS</div>
+    <div class="ring-text mid-label" style="top: 115px; left: 50%; transform: translateX(-50%);">Shopify</div>
+    <div class="ring-text mid-label" style="bottom: 115px; left: 50%; transform: translateX(-50%);">Slack</div>
+    <div class="ring-text mid-label" style="top: 50%; left: 108px; transform: translateY(-50%);">Bank</div>
+    <div class="ring-text mid-label" style="top: 50%; right: 115px; transform: translateY(-80%);">Meta Ads</div>
+    <div class="ring-text mid-label" style="top: 160px; left: 120px;">Notion</div>
+    <div class="ring-text mid-label" style="top: 160px; right: 120px;">CRM</div>
+    <div class="ring-text outer-label" style="top: 30px; left: 50%; transform: translateX(-50%);">Automationen</div>
+    <div class="ring-text outer-label" style="top: 50%; right: -40px; transform: translateY(20%);">AI-Automationen</div>
+    <div class="ring-text outer-label" style="bottom: 30px; left: 50%; transform: translateX(-50%);">Agenten</div>
+    <div class="ring-text outer-label" style="top: 50%; left: 20px; transform: translateY(-50%);">Apps</div>
+  </div>
+</div>
+
+<div class="nav-arrow nav-left" id="nav-left">&#8249;</div>
+<div class="nav-arrow nav-right" id="nav-right">&#8250;</div>
+<div class="nav-dots" id="nav-dots"></div>
+<script>
+let current = 0;
+const slides = document.querySelectorAll('.slide');
+const dotsContainer = document.getElementById('nav-dots');
+const navLeft = document.getElementById('nav-left');
+const navRight = document.getElementById('nav-right');
+
+// Create dots
+slides.forEach((_, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'dot';
+  dot.addEventListener('click', () => show(i));
+  dotsContainer.appendChild(dot);
+});
+const dots = dotsContainer.querySelectorAll('.dot');
+
+function show(n) {
+  if (n < 0 || n >= slides.length) return;
+  slides[current].style.display = '';
+  slides[current].classList.remove('active');
+  dots[current].classList.remove('active');
+  current = n;
+  slides[current].style.display = 'flex';
+  slides[current].classList.add('active');
+  dots[current].classList.add('active');
+  navLeft.style.opacity = current === 0 ? '0.15' : '0.5';
+  navRight.style.opacity = current === slides.length - 1 ? '0.15' : '0.5';
+}
+
+navLeft.addEventListener('click', () => show(current - 1));
+navRight.addEventListener('click', () => show(current + 1));
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); show(current - 1); }
+});
+show(0);
+</script>
+</body>
+</html>
