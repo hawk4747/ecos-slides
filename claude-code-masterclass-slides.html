@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Masterclass — Slides</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Montserrat:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0A0B12;
+  --bg-surface: #12131D;
+  --bg-card: #1A1B28;
+  --text: #FFFFFF;
+  --text-muted: #8A8B9E;
+  --accent-green: #00E676;
+  --accent-yellow: #FFD600;
+  --accent-red: #FF1744;
+  --blue: #2B78E4;
+  --teal: #2EA3A5;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'Montserrat', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+body { background: #000; overflow: hidden; cursor: none; }
+
+.slide {
+  width: 100vw; height: 100vh;
+  display: none; flex-direction: column; justify-content: center; align-items: center;
+  background: var(--bg); padding: 60px 80px;
+  position: relative; overflow: hidden; opacity: 0; transition: opacity 0.2s ease;
+}
+.slide.active { display: flex; opacity: 1; }
+.slide::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(46,163,165,0.06) 0%, transparent 60%);
+  pointer-events: none;
+}
+.slide::before {
+  content: ''; position: absolute; bottom: 0; left: 10%; right: 10%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--teal), transparent); opacity: 0.3;
+}
+
+.counter {
+  position: fixed; bottom: 24px; right: 36px;
+  font-family: var(--font-mono); color: var(--text-muted); font-size: 14px; z-index: 100; opacity: 0.5;
+}
+
+.slide-heading {
+  font-family: var(--font-body); font-size: 72px; font-weight: 800; color: var(--text);
+  margin-bottom: 64px; text-align: center; text-transform: uppercase; letter-spacing: 2px;
+}
+.slide-heading span { color: var(--teal); }
+
+/* ---- SLIDE 1: Übersicht ---- */
+.overview-flow { display: flex; align-items: center; gap: 28px; }
+.overview-step {
+  background: var(--bg-card); border-left: 4px solid var(--teal);
+  padding: 40px 48px; border-radius: 12px; min-width: 240px; text-align: center;
+}
+.overview-step .step-num {
+  font-family: var(--font-mono); font-size: 18px; color: var(--teal);
+  margin-bottom: 12px; letter-spacing: 3px;
+}
+.overview-step .step-label {
+  font-family: var(--font-body); font-size: 30px; font-weight: 700; color: var(--text); margin-bottom: 8px;
+}
+.overview-step .step-count { font-family: var(--font-mono); font-size: 18px; color: var(--text-muted); }
+.overview-arrow {
+  width: 48px; height: 3px; background: var(--text-muted); position: relative; flex-shrink: 0;
+}
+.overview-arrow::after {
+  content: ''; position: absolute; right: 0; top: -5px;
+  border: 6px solid transparent; border-left: 10px solid var(--text-muted);
+}
+
+/* ---- SLIDE 2 + 6 + 11: Comparison ---- */
+.comp-heading {
+  font-family: var(--font-body); font-size: 72px; font-weight: 800; color: var(--text);
+  margin-bottom: 56px; text-align: center; width: 100%; text-transform: uppercase; letter-spacing: 2px;
+}
+.comp-heading span { color: var(--teal); }
+.comp-grid {
+  display: grid; grid-template-columns: 1fr 2px 1fr; gap: 64px;
+  width: 100%; max-width: 1200px;
+}
+.comp-divider { background: var(--text-muted); opacity: 0.3; }
+.comp-col h3 { font-family: var(--font-body); font-size: 36px; font-weight: 700; margin-bottom: 36px; }
+.comp-left h3 { color: var(--text-muted); }
+.comp-right h3 { color: var(--teal); }
+.comp-col ul { list-style: none; font-family: var(--font-body); font-size: 28px; color: var(--text); line-height: 2.2; }
+.comp-col li { padding-left: 36px; position: relative; margin-bottom: 8px; }
+.comp-left li::before { content: '—'; position: absolute; left: 0; color: var(--text-muted); }
+.comp-right li::before { content: '✓'; position: absolute; left: 0; color: var(--teal); font-weight: 700; }
+
+/* ---- SLIDE 3: Context Rot ---- */
+.context-visual { display: flex; align-items: flex-end; gap: 64px; }
+.context-bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.context-bar { width: 120px; border-radius: 12px 12px 0 0; }
+.context-bar-label { font-family: var(--font-mono); font-size: 24px; color: var(--text-muted); }
+.context-bar-quality { font-family: var(--font-body); font-size: 26px; font-weight: 700; margin-top: 8px; }
+
+/* ---- SLIDE 4: Permissions ---- */
+.perm-flow { display: flex; align-items: stretch; gap: 28px; }
+.perm-card {
+  background: var(--bg-card); border-radius: 16px; padding: 44px 40px;
+  width: 320px; text-align: center; border-top: 4px solid var(--text-muted);
+  display: flex; flex-direction: column; gap: 16px;
+}
+.perm-card.active-card { border-top-color: var(--teal); }
+.perm-card .perm-name { font-family: var(--font-body); font-size: 28px; font-weight: 700; color: var(--text); }
+.perm-card .perm-desc { font-family: var(--font-body); font-size: 22px; color: var(--text-muted); line-height: 1.5; }
+.perm-card .perm-tag {
+  font-family: var(--font-mono); font-size: 18px; padding: 8px 20px;
+  border-radius: 6px; display: inline-block; margin-top: auto;
+}
+.perm-tag.safe { background: rgba(0,230,118,0.15); color: var(--accent-green); }
+.perm-tag.mid { background: rgba(43,120,228,0.15); color: var(--blue); }
+.perm-tag.fast { background: rgba(46,163,165,0.2); color: var(--teal); }
+.perm-arrow { display: flex; align-items: center; color: var(--text-muted); font-size: 36px; flex-shrink: 0; }
+
+/* ---- SLIDE 5: Model-Wahl ---- */
+.model-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 40px; width: 100%; max-width: 1100px; }
+.model-card {
+  background: var(--bg-card); border-radius: 16px; padding: 48px 36px;
+  text-align: center; border-top: 4px solid var(--text-muted);
+}
+.model-card.opus { border-top-color: var(--teal); }
+.model-card.sonnet { border-top-color: var(--blue); }
+.model-card .model-name { font-family: var(--font-body); font-size: 36px; font-weight: 800; color: var(--text); margin-bottom: 24px; }
+.model-card .model-trait { font-family: var(--font-body); font-size: 24px; color: var(--text-muted); line-height: 2; }
+.model-card .model-trait strong { color: var(--text); font-weight: 600; }
+
+/* ---- SLIDE 7: Subagents ---- */
+.agent-container { display: flex; gap: 120px; align-items: flex-start; }
+.agent-group { display: flex; flex-direction: column; align-items: center; gap: 24px; }
+.agent-group-label { font-family: var(--font-body); font-size: 30px; font-weight: 700; color: var(--text-muted); margin-bottom: 12px; }
+.agent-group-label.active-label { color: var(--teal); }
+.agent-box {
+  background: var(--bg-card); border-radius: 12px; padding: 20px 32px;
+  font-family: var(--font-body); font-size: 22px; color: var(--text); text-align: center; min-width: 160px;
+}
+.agent-box.main { border: 2px solid var(--teal); font-weight: 700; font-size: 24px; }
+.agent-subs { display: flex; gap: 16px; }
+.agent-line { width: 3px; height: 28px; background: var(--text-muted); opacity: 0.4; }
+.agent-note { font-family: var(--font-body); font-size: 20px; margin-top: 16px; }
+
+/* ---- SLIDE 8: CLAUDE.md Hub (SVG-based) ---- */
+.hub-svg-wrap {
+  position: relative; width: 800px; height: 480px;
+}
+.hub-svg-wrap svg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+}
+.hub-node {
+  position: absolute; background: var(--bg-card); border-radius: 12px;
+  padding: 16px 28px; font-family: var(--font-body); font-size: 22px;
+  font-weight: 600; color: var(--text); text-align: center;
+  transform: translate(-50%, -50%);
+}
+.hub-node.center {
+  background: var(--bg-card); border: 3px solid var(--teal); border-radius: 16px;
+  padding: 24px 44px; font-family: var(--font-mono); font-size: 30px;
+  font-weight: 500; color: var(--teal);
+}
+
+/* ---- SLIDE 8b: Briefing Layout ---- */
+.briefing-layout {
+  display: flex; flex-direction: column; align-items: center; gap: 0; width: 100%;
+}
+.briefing-file {
+  background: var(--bg-card); border: 3px solid var(--teal); border-radius: 16px;
+  padding: 32px 56px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.briefing-file-icon { font-size: 40px; }
+.briefing-file-name { font-family: var(--font-mono); font-size: 30px; font-weight: 500; color: var(--teal); }
+.briefing-file-desc { font-family: var(--font-body); font-size: 18px; color: var(--text-muted); }
+.briefing-arrows { display: flex; justify-content: center; }
+.briefing-targets { display: flex; gap: 36px; justify-content: center; }
+.briefing-target {
+  background: var(--bg-card); border-radius: 12px; padding: 24px 36px; text-align: center;
+}
+.briefing-target-label { font-family: var(--font-body); font-size: 24px; font-weight: 600; color: var(--text); }
+
+/* ---- SLIDE 9: Plan Mode ---- */
+.plan-compare { display: flex; gap: 100px; align-items: flex-start; }
+.plan-path { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.plan-path-label { font-family: var(--font-body); font-size: 28px; font-weight: 700; margin-bottom: 12px; }
+.plan-path-label.bad { color: var(--accent-red); }
+.plan-path-label.good { color: var(--accent-green); }
+.plan-step-box {
+  background: var(--bg-card); border-radius: 12px; padding: 22px 40px;
+  font-family: var(--font-body); font-size: 24px; color: var(--text); text-align: center; min-width: 260px;
+}
+.plan-step-box.highlight { border-left: 4px solid var(--teal); }
+.plan-step-box.dim { opacity: 0.5; }
+.plan-arrow-down { width: 3px; height: 24px; background: var(--text-muted); position: relative; }
+.plan-arrow-down::after {
+  content: ''; position: absolute; bottom: 0; left: -5px;
+  border: 6px solid transparent; border-top: 10px solid var(--text-muted);
+}
+.plan-result { font-family: var(--font-body); font-size: 22px; font-weight: 700; margin-top: 8px; }
+.plan-result.bad { color: var(--accent-red); }
+.plan-result.good { color: var(--accent-green); }
+
+/* ---- SLIDE 10: Git Savepoints ---- */
+.git-container { display: flex; flex-direction: column; align-items: center; gap: 48px; width: 100%; }
+.git-row { display: flex; align-items: flex-start; gap: 0; }
+.git-node-big { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.git-dot-big {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--teal);
+  border: 4px solid var(--bg); box-shadow: 0 0 0 3px var(--teal); flex-shrink: 0;
+}
+.git-dot-big.bad { background: var(--accent-red); box-shadow: 0 0 0 3px var(--accent-red); }
+.git-label-big { font-family: var(--font-mono); font-size: 22px; color: var(--text-muted); }
+.git-line-big { width: 100px; height: 4px; background: var(--text-muted); opacity: 0.4; margin-top: 16px; }
+.git-rollback-box {
+  display: flex; align-items: center; gap: 16px;
+  background: rgba(255,23,68,0.1); border: 2px solid var(--accent-red); border-radius: 12px;
+  padding: 20px 36px; font-family: var(--font-body); font-size: 24px; font-weight: 600; color: var(--accent-red);
+}
+.git-rollback-box svg { flex-shrink: 0; }
+
+/* ---- SLIDE 12: Few-Shot ---- */
+.fewshot-container { display: flex; align-items: center; gap: 36px; }
+.fewshot-input-group { display: flex; align-items: center; gap: 20px; }
+.fewshot-card {
+  background: var(--bg-card); border-radius: 14px; padding: 36px 40px;
+  text-align: center; min-width: 180px;
+}
+.fewshot-card .fs-icon { font-size: 48px; margin-bottom: 16px; display: block; }
+.fewshot-card .fs-label { font-family: var(--font-body); font-size: 24px; font-weight: 600; color: var(--text); }
+.fewshot-plus { font-family: var(--font-body); font-size: 40px; color: var(--teal); font-weight: 700; }
+.fewshot-equals {
+  font-family: var(--font-body); font-size: 48px; color: var(--text-muted); font-weight: 300;
+  margin: 0 12px;
+}
+.fewshot-result-card {
+  background: var(--bg-card); border: 3px solid var(--teal); border-radius: 14px;
+  padding: 36px 48px; text-align: center;
+}
+.fewshot-result-card .fs-icon { font-size: 48px; margin-bottom: 16px; display: block; color: var(--teal); }
+.fewshot-result-card .fs-label { font-family: var(--font-body); font-size: 26px; font-weight: 700; color: var(--teal); }
+
+/* ---- SLIDE 13: Hooks ---- */
+.hooks-flow { display: flex; align-items: center; gap: 28px; }
+.hook-box {
+  background: var(--bg-card); border-radius: 14px; padding: 40px 44px; text-align: center;
+}
+.hook-box .hook-icon { font-size: 44px; margin-bottom: 16px; }
+.hook-box .hook-label { font-family: var(--font-body); font-size: 26px; font-weight: 700; color: var(--text); }
+.hook-box .hook-desc { font-family: var(--font-body); font-size: 20px; color: var(--text-muted); margin-top: 10px; }
+.hook-box.trigger { border-top: 4px solid var(--blue); }
+.hook-box.hook-mid { border-top: 4px solid var(--teal); }
+.hook-box.action { border-top: 4px solid var(--accent-green); }
+.hook-arrow {
+  width: 56px; height: 3px; background: var(--text-muted); position: relative; flex-shrink: 0;
+}
+.hook-arrow::after {
+  content: ''; position: absolute; right: 0; top: -5px;
+  border: 6px solid transparent; border-left: 10px solid var(--text-muted);
+}
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1: Übersicht -->
+<div class="slide active" id="slide-1">
+  <h2 class="slide-heading"><span>27 Konzepte</span> in 4 Sektionen</h2>
+  <div class="overview-flow">
+    <div class="overview-step">
+      <div class="step-num">SEKTION 1</div>
+      <div class="step-label">Basics</div>
+      <div class="step-count">3 Konzepte</div>
+    </div>
+    <div class="overview-arrow"></div>
+    <div class="overview-step">
+      <div class="step-num">SEKTION 2</div>
+      <div class="step-label">Fundament</div>
+      <div class="step-count">7 Konzepte</div>
+    </div>
+    <div class="overview-arrow"></div>
+    <div class="overview-step">
+      <div class="step-num">SEKTION 3</div>
+      <div class="step-label">Toolkit</div>
+      <div class="step-count">7 Konzepte</div>
+    </div>
+    <div class="overview-arrow"></div>
+    <div class="overview-step">
+      <div class="step-num">SEKTION 4</div>
+      <div class="step-label">Power User</div>
+      <div class="step-count">10 Konzepte</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 2: claude.ai vs Claude Code -->
+<div class="slide" id="slide-2">
+  <h2 class="comp-heading">claude.ai vs <span>Claude Code</span></h2>
+  <div class="comp-grid">
+    <div class="comp-col comp-left">
+      <h3>claude.ai</h3>
+      <ul>
+        <li>Chat-Interface</li>
+        <li>Redet</li>
+        <li>Gibt Antworten</li>
+        <li>Kein Zugriff auf Dateien</li>
+      </ul>
+    </div>
+    <div class="comp-divider"></div>
+    <div class="comp-col comp-right">
+      <h3>Claude Code</h3>
+      <ul>
+        <li>Terminal</li>
+        <li>Handelt</li>
+        <li>Führt aus</li>
+        <li>Liest, schreibt, baut</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: Context Rot -->
+<div class="slide" id="slide-3">
+  <h2 class="slide-heading">Context <span>Rot</span></h2>
+  <div class="context-visual">
+    <div class="context-bar-wrap">
+      <div class="context-bar" style="height:300px; background: linear-gradient(to top, var(--accent-green), var(--teal));"></div>
+      <div class="context-bar-label">5%</div>
+      <div class="context-bar-quality" style="color: var(--accent-green);">Top</div>
+    </div>
+    <div class="context-bar-wrap">
+      <div class="context-bar" style="height:240px; background: linear-gradient(to top, var(--teal), var(--blue));"></div>
+      <div class="context-bar-label">20%</div>
+      <div class="context-bar-quality" style="color: var(--blue);">Gut</div>
+    </div>
+    <div class="context-bar-wrap">
+      <div class="context-bar" style="height:160px; background: linear-gradient(to top, var(--accent-yellow), var(--accent-yellow));"></div>
+      <div class="context-bar-label">50%</div>
+      <div class="context-bar-quality" style="color: var(--accent-yellow);">Schlechter</div>
+    </div>
+    <div class="context-bar-wrap">
+      <div class="context-bar" style="height:80px; background: linear-gradient(to top, var(--accent-red), var(--accent-red));"></div>
+      <div class="context-bar-label">80%+</div>
+      <div class="context-bar-quality" style="color: var(--accent-red);">Schlecht</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4: Permissions -->
+<div class="slide" id="slide-4">
+  <h2 class="slide-heading"><span>Permissions</span></h2>
+  <div class="perm-flow">
+    <div class="perm-card">
+      <div class="perm-name">Default</div>
+      <div class="perm-desc">Fragt bei allem nach Erlaubnis</div>
+      <div class="perm-tag safe">Sicher</div>
+    </div>
+    <div class="perm-arrow">›</div>
+    <div class="perm-card">
+      <div class="perm-name">Accept Edits</div>
+      <div class="perm-desc">Dateien auto, Terminal fragt</div>
+      <div class="perm-tag mid">Mittelweg</div>
+    </div>
+    <div class="perm-arrow">›</div>
+    <div class="perm-card active-card">
+      <div class="perm-name">Bypass</div>
+      <div class="perm-desc">Macht alles ohne zu fragen</div>
+      <div class="perm-tag fast">Schnell</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 5: Model-Wahl -->
+<div class="slide" id="slide-5">
+  <h2 class="slide-heading"><span>Model</span>-Wahl</h2>
+  <div class="model-grid">
+    <div class="model-card opus">
+      <div class="model-name">Opus</div>
+      <div class="model-trait"><strong>Stärkstes</strong> Modell</div>
+      <div class="model-trait">Komplexe Tasks</div>
+      <div class="model-trait">Mehr Usage</div>
+    </div>
+    <div class="model-card sonnet">
+      <div class="model-name">Sonnet</div>
+      <div class="model-trait"><strong>Schnell</strong> + günstig</div>
+      <div class="model-trait">Für die meisten Tasks</div>
+      <div class="model-trait">Bester Allrounder</div>
+    </div>
+    <div class="model-card">
+      <div class="model-name">Haiku</div>
+      <div class="model-trait"><strong>Günstigst</strong></div>
+      <div class="model-trait">Nischen-Tasks</div>
+      <div class="model-trait">Brauchst du selten</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6: MCP vs CLI -->
+<div class="slide" id="slide-6">
+  <h2 class="comp-heading"><span>MCP</span> vs <span>CLI</span></h2>
+  <div class="comp-grid">
+    <div class="comp-col comp-left">
+      <h3>MCP</h3>
+      <ul>
+        <li>API-basiert</li>
+        <li>Bequem einzurichten</li>
+        <li>Mehr Overhead</li>
+        <li>Langsamer</li>
+      </ul>
+    </div>
+    <div class="comp-divider"></div>
+    <div class="comp-col comp-right">
+      <h3>CLI</h3>
+      <ul>
+        <li>Im Terminal</li>
+        <li>90% weniger Tokens</li>
+        <li>Schneller</li>
+        <li>Bevorzugt nutzen</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: Subagents vs Agent Teams -->
+<div class="slide" id="slide-7">
+  <h2 class="slide-heading"><span>Subagents</span> vs Agent Teams</h2>
+  <div class="agent-container">
+    <div class="agent-group">
+      <div class="agent-group-label">Subagents</div>
+      <div class="agent-box main">Claude Code</div>
+      <div class="agent-line"></div>
+      <div class="agent-subs">
+        <div class="agent-box">Frontend</div>
+        <div class="agent-box">Backend</div>
+        <div class="agent-box">Research</div>
+      </div>
+      <div class="agent-note" style="color: var(--text-muted);">Arbeiten isoliert</div>
+    </div>
+    <div style="display:flex; align-items:center; font-family: var(--font-body); font-size: 28px; color: var(--text-muted);">vs</div>
+    <div class="agent-group">
+      <div class="agent-group-label active-label">Agent Teams</div>
+      <div class="agent-box main">Koordinator</div>
+      <div class="agent-line"></div>
+      <div class="agent-subs">
+        <div class="agent-box" style="border: 1px solid var(--teal);">Frontend</div>
+        <div class="agent-box" style="border: 1px solid var(--teal);">Backend</div>
+        <div class="agent-box" style="border: 1px solid var(--teal);">Research</div>
+      </div>
+      <div class="agent-note" style="color: var(--teal);">Reden miteinander</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8: CLAUDE.md — Briefing: Was es beeinflusst -->
+<div class="slide" id="slide-8">
+  <h2 class="slide-heading"><span>CLAUDE.md</span> beeinflusst alles</h2>
+  <div class="briefing-layout">
+    <div class="briefing-file">
+      <div class="briefing-file-icon">📄</div>
+      <div class="briefing-file-name">CLAUDE.md</div>
+      <div class="briefing-file-desc">Wird bei jedem Prompt gelesen</div>
+    </div>
+    <div class="briefing-arrows">
+      <svg viewBox="0 0 600 60" width="600" height="60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="300" y1="0" x2="75" y2="50" stroke="#2EA3A5" stroke-width="2.5" opacity="0.4"/>
+        <line x1="300" y1="0" x2="225" y2="50" stroke="#2EA3A5" stroke-width="2.5" opacity="0.4"/>
+        <line x1="300" y1="0" x2="375" y2="50" stroke="#2EA3A5" stroke-width="2.5" opacity="0.4"/>
+        <line x1="300" y1="0" x2="525" y2="50" stroke="#2EA3A5" stroke-width="2.5" opacity="0.4"/>
+        <polygon points="71,46 79,46 75,55" fill="#2EA3A5" opacity="0.5"/>
+        <polygon points="221,46 229,46 225,55" fill="#2EA3A5" opacity="0.5"/>
+        <polygon points="371,46 379,46 375,55" fill="#2EA3A5" opacity="0.5"/>
+        <polygon points="521,46 529,46 525,55" fill="#2EA3A5" opacity="0.5"/>
+      </svg>
+    </div>
+    <div class="briefing-targets">
+      <div class="briefing-target">
+        <div class="briefing-target-label">Code-Stil</div>
+      </div>
+      <div class="briefing-target">
+        <div class="briefing-target-label">Tools</div>
+      </div>
+      <div class="briefing-target">
+        <div class="briefing-target-label">Agents</div>
+      </div>
+      <div class="briefing-target">
+        <div class="briefing-target-label">Output</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 9: Plan Mode -->
+<div class="slide" id="slide-9">
+  <h2 class="slide-heading"><span>Plan</span> Mode</h2>
+  <div class="plan-compare">
+    <div class="plan-path">
+      <div class="plan-path-label bad">Ohne Plan</div>
+      <div class="plan-step-box">Prompt</div>
+      <div class="plan-arrow-down"></div>
+      <div class="plan-step-box dim">Direkt loslegen</div>
+      <div class="plan-arrow-down"></div>
+      <div class="plan-step-box dim">Output</div>
+      <div class="plan-result bad">Glücksspiel</div>
+    </div>
+    <div style="display:flex; align-items:center; font-family: var(--font-body); font-size: 28px; color: var(--text-muted);">vs</div>
+    <div class="plan-path">
+      <div class="plan-path-label good">Mit Plan</div>
+      <div class="plan-step-box">Prompt</div>
+      <div class="plan-arrow-down"></div>
+      <div class="plan-step-box highlight">Rückfragen</div>
+      <div class="plan-arrow-down"></div>
+      <div class="plan-step-box highlight">Plan erstellen</div>
+      <div class="plan-arrow-down"></div>
+      <div class="plan-step-box highlight">Ausführen</div>
+      <div class="plan-result good">Gezieltes Ergebnis</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 10: Git Savepoints (Redesigned) -->
+<div class="slide" id="slide-10">
+  <h2 class="slide-heading">Git als <span>Savepoint</span></h2>
+  <div class="git-container">
+    <div class="git-row">
+      <div class="git-node-big">
+        <div class="git-dot-big"></div>
+        <div class="git-label-big">Commit 1</div>
+      </div>
+      <div class="git-line-big"></div>
+      <div class="git-node-big">
+        <div class="git-dot-big"></div>
+        <div class="git-label-big">Commit 2</div>
+      </div>
+      <div class="git-line-big"></div>
+      <div class="git-node-big">
+        <div class="git-dot-big"></div>
+        <div class="git-label-big">Commit 3</div>
+      </div>
+      <div class="git-line-big"></div>
+      <div class="git-node-big">
+        <div class="git-dot-big bad"></div>
+        <div class="git-label-big" style="color: var(--accent-red);">Bug!</div>
+      </div>
+    </div>
+    <div class="git-rollback-box">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+      Zurück zu Commit 3
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 11: Skills -->
+<div class="slide" id="slide-11">
+  <h2 class="comp-heading">Ohne vs mit <span>Skill</span></h2>
+  <div class="comp-grid">
+    <div class="comp-col comp-left">
+      <h3>Ohne Skill</h3>
+      <ul>
+        <li>Generischer Output</li>
+        <li>AI Slop Design</li>
+        <li>Keine Regeln</li>
+        <li>Trial and Error</li>
+      </ul>
+    </div>
+    <div class="comp-divider"></div>
+    <div class="comp-col comp-right">
+      <h3>Mit Skill</h3>
+      <ul>
+        <li>Gezielter Output</li>
+        <li>Dein Stil, deine Regeln</li>
+        <li>Konsistente Qualität</li>
+        <li>Reproduzierbar</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 12: Few-Shot Prompting (Redesigned) -->
+<div class="slide" id="slide-12">
+  <h2 class="slide-heading"><span>Few-Shot</span> Prompting</h2>
+  <div class="fewshot-container">
+    <div class="fewshot-input-group">
+      <div class="fewshot-card">
+        <span class="fs-icon">💬</span>
+        <div class="fs-label">Prompt</div>
+      </div>
+      <div class="fewshot-plus">+</div>
+      <div class="fewshot-card">
+        <span class="fs-icon">🖼️</span>
+        <div class="fs-label">Screenshots</div>
+      </div>
+      <div class="fewshot-plus">+</div>
+      <div class="fewshot-card">
+        <span class="fs-icon">📄</span>
+        <div class="fs-label">Code</div>
+      </div>
+    </div>
+    <div class="fewshot-equals">=</div>
+    <div class="fewshot-result-card">
+      <span class="fs-icon">✓</span>
+      <div class="fs-label">Präziser Output</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 13: Hooks -->
+<div class="slide" id="slide-13">
+  <h2 class="slide-heading"><span>Hooks</span></h2>
+  <div class="hooks-flow">
+    <div class="hook-box trigger">
+      <div class="hook-icon">⚡</div>
+      <div class="hook-label">Event</div>
+      <div class="hook-desc">Claude ist fertig</div>
+    </div>
+    <div class="hook-arrow"></div>
+    <div class="hook-box hook-mid">
+      <div class="hook-icon">🔗</div>
+      <div class="hook-label">Hook</div>
+      <div class="hook-desc">Automatisch auslösen</div>
+    </div>
+    <div class="hook-arrow"></div>
+    <div class="hook-box action">
+      <div class="hook-icon">🔔</div>
+      <div class="hook-label">Aktion</div>
+      <div class="hook-desc">Sound / Tests / Email</div>
+    </div>
+  </div>
+</div>
+
+<div class="counter" id="counter"></div>
+<script>
+let current = 0;
+const slides = document.querySelectorAll('.slide');
+const counter = document.getElementById('counter');
+
+function show(n) {
+  if (n < 0 || n >= slides.length) return;
+  slides[current].classList.remove('active');
+  current = n;
+  slides[current].classList.add('active');
+  counter.textContent = (current + 1) + ' / ' + slides.length;
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+    e.preventDefault();
+    show(current + 1);
+  }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    show(current - 1);
+  }
+});
+
+show(0);
+</script>
+</body>
+</html>
