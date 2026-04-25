@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code: Dein erster eigener Skill</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0A0B12;
+  --bg-surface: #12131D;
+  --bg-card: #1A1B28;
+  --text: #FFFFFF;
+  --text-muted: #8A8B9E;
+  --accent-green: #00E676;
+  --blue: #2B78E4;
+  --teal: #2EA3A5;
+  --font-body: 'Montserrat', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+body {
+  background: #000;
+  overflow: hidden;
+  font-family: var(--font-body);
+}
+
+.slide {
+  width: 100vw;
+  height: 100vh;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg);
+  padding: 80px 120px;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.slide.active { display: flex; opacity: 1; }
+
+.slide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(46,163,165,0.06) 0%, transparent 60%);
+  pointer-events: none;
+}
+.slide::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--teal), transparent);
+  opacity: 0.3;
+}
+
+h2.heading {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 56px;
+  color: var(--text);
+  margin-bottom: 64px;
+  text-align: center;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+h2.heading .accent { color: var(--teal); }
+
+.counter {
+  position: fixed;
+  bottom: 24px;
+  right: 36px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  font-size: 14px;
+  z-index: 100;
+  opacity: 0.5;
+}
+
+/* ======= Slide 1: File Diagram ======= */
+.file-diagram {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+}
+.file-tree {
+  background: var(--bg-card);
+  border-radius: 14px;
+  padding: 36px 48px;
+  font-family: var(--font-mono);
+  font-size: 26px;
+  color: var(--text);
+  line-height: 1.8;
+  box-shadow: 0 0 0 1px rgba(46,163,165,0.2);
+}
+.file-tree .folder { color: var(--teal); font-weight: 700; }
+.file-tree .file { color: var(--text); }
+.file-tree .indent { color: var(--text-muted); }
+
+.code-block {
+  background: var(--bg-surface);
+  border-left: 4px solid var(--teal);
+  border-radius: 8px;
+  padding: 24px 32px;
+  font-family: var(--font-mono);
+  font-size: 22px;
+  color: var(--text);
+  line-height: 1.7;
+  max-width: 720px;
+  width: 100%;
+}
+.code-block .key { color: var(--teal); }
+.code-block .val { color: var(--text); }
+.code-block .delim { color: var(--text-muted); }
+
+/* ======= Slide 2 + 3: 3-Block-Flow ======= */
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: nowrap;
+  justify-content: center;
+  width: 100%;
+  max-width: 1400px;
+}
+.flow-step {
+  background: var(--bg-card);
+  border-left: 4px solid var(--teal);
+  padding: 32px 28px;
+  border-radius: 10px;
+  flex: 1;
+  text-align: left;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.flow-step .step-num {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--teal);
+  margin-bottom: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+.flow-step .step-title {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 28px;
+  color: var(--text);
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+.flow-step .step-desc {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 18px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+.flow-arrow {
+  width: 40px;
+  height: 3px;
+  background: var(--teal);
+  position: relative;
+  flex-shrink: 0;
+}
+.flow-arrow::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -7px;
+  border: 8px solid transparent;
+  border-left: 14px solid var(--teal);
+}
+
+/* ======= Slide 4: 3 Kriterien Hub ======= */
+.criteria-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 32px;
+  width: 100%;
+  max-width: 1200px;
+}
+.criterion {
+  background: var(--bg-card);
+  border-top: 4px solid var(--teal);
+  padding: 40px 32px;
+  border-radius: 12px;
+  text-align: center;
+}
+.criterion .crit-icon {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--teal);
+  letter-spacing: 3px;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+.criterion .crit-title {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 32px;
+  color: var(--text);
+  margin-bottom: 14px;
+  line-height: 1.15;
+}
+.criterion .crit-desc {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 18px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ======= Slide 5: Datei-Baum erweitert ======= */
+.tree-detailed {
+  background: var(--bg-card);
+  border-radius: 14px;
+  padding: 48px 64px;
+  font-family: var(--font-mono);
+  font-size: 30px;
+  line-height: 1.85;
+  color: var(--text);
+  box-shadow: 0 0 0 1px rgba(46,163,165,0.2);
+  min-width: 720px;
+}
+.tree-detailed .root { color: var(--teal); font-weight: 700; }
+.tree-detailed .branch { color: var(--text-muted); }
+.tree-detailed .file-name { color: var(--text); font-weight: 600; }
+.tree-detailed .folder-name { color: var(--teal); font-weight: 600; }
+.tree-detailed .comment { color: var(--text-muted); font-size: 22px; font-style: italic; }
+
+/* ======= Slide 6: 2-Block-Vergleich ======= */
+.scope-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  width: 100%;
+  max-width: 1200px;
+}
+.scope-col {
+  background: var(--bg-card);
+  border-radius: 14px;
+  padding: 48px 40px;
+  border-top: 4px solid;
+}
+.scope-col.user-scope { border-top-color: var(--teal); }
+.scope-col.project-scope { border-top-color: var(--blue); }
+
+.scope-label {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 3px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.scope-col.user-scope .scope-label { color: var(--teal); }
+.scope-col.project-scope .scope-label { color: var(--blue); }
+
+.scope-title {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 36px;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+.scope-path {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  color: var(--text);
+  background: var(--bg-surface);
+  padding: 14px 20px;
+  border-radius: 6px;
+  margin-bottom: 24px;
+  display: inline-block;
+}
+.scope-where {
+  font-family: var(--font-body);
+  font-size: 22px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.scope-where strong { color: var(--text); font-weight: 700; }
+
+/* ======= Loop: 4 Schritte im Kreis ======= */
+.loop-circle {
+  position: relative;
+  width: 720px;
+  height: 720px;
+}
+.loop-circle svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+.loop-step {
+  position: absolute;
+  background: var(--bg-card);
+  border-top: 4px solid var(--teal);
+  padding: 24px 28px;
+  border-radius: 12px;
+  width: 220px;
+  text-align: center;
+  z-index: 2;
+}
+.loop-step .step-num {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--teal);
+  letter-spacing: 2px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.loop-step .step-title {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--text);
+  line-height: 1.2;
+}
+.loop-step.pos-top    { top: 70px; left: 50%; transform: translateX(-50%); }
+.loop-step.pos-right  { right: 10px; top: 50%; transform: translateY(-50%); }
+.loop-step.pos-bottom { bottom: 70px; left: 50%; transform: translateX(-50%); }
+.loop-step.pos-left   { left: 10px; top: 50%; transform: translateY(-50%); }
+</style>
+</head>
+<body>
+
+<!-- ============ Slide 2: Wie Claude Skills lädt ============ -->
+<div class="slide" id="slide-2">
+  <h2 class="heading">Wie Claude Skills <span class="accent">lädt</span></h2>
+  <div class="flow">
+    <div class="flow-step">
+      <div class="step-num">01</div>
+      <div class="step-title">Liste sehen</div>
+      <div class="step-desc">Nur Name und Beschreibung von jedem Skill — immer sichtbar.</div>
+    </div>
+    <div class="flow-arrow"></div>
+    <div class="flow-step">
+      <div class="step-num">02</div>
+      <div class="step-title">Match auf Prompt</div>
+      <div class="step-desc">Dein Prompt passt zur Beschreibung eines Skills.</div>
+    </div>
+    <div class="flow-arrow"></div>
+    <div class="flow-step">
+      <div class="step-num">03</div>
+      <div class="step-title">Skill nachladen</div>
+      <div class="step-desc">Erst jetzt landet der volle Skill im Kontext.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Slide 3: Die 3 Trigger-Wege ============ -->
+<div class="slide" id="slide-3">
+  <h2 class="heading">3 Wege einen Skill zu <span class="accent">triggern</span></h2>
+  <div class="flow">
+    <div class="flow-step">
+      <div class="step-num">OPTION 1</div>
+      <div class="step-title">Natural Language</div>
+      <div class="step-desc">"Schreib mir eine Produktbeschreibung." Hoffen dass Claude den richtigen Skill findet.</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">OPTION 2</div>
+      <div class="step-title">Expliziter Hinweis</div>
+      <div class="step-desc">"Nutz den Meta-Ads Skill für den Text." Zwingt Claude in die Richtung.</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">OPTION 3</div>
+      <div class="step-title">Slash-Command</div>
+      <div class="step-desc">/meta-ads — Claude lädt den Skill garantiert.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Slide 4: Wann lohnt sich ein Skill ============ -->
+<div class="slide" id="slide-4">
+  <h2 class="heading">Wann lohnt sich ein <span class="accent">eigener Skill</span></h2>
+  <div class="criteria-grid">
+    <div class="criterion">
+      <div class="crit-icon">01</div>
+      <div class="crit-title">Wiederholung</div>
+      <div class="crit-desc">Du machst die Aufgabe mindestens jede Woche.</div>
+    </div>
+    <div class="criterion">
+      <div class="crit-icon">02</div>
+      <div class="crit-title">Eigener Stil</div>
+      <div class="crit-desc">Claude würde es ohne Info anders machen als du willst.</div>
+    </div>
+    <div class="criterion">
+      <div class="crit-icon">03</div>
+      <div class="crit-title">Eigenes Wissen</div>
+      <div class="crit-desc">Brand, Kunden, Frameworks — Kontext aus deiner Welt.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Slide 5: Anatomie eines Skills ============ -->
+<div class="slide" id="slide-5">
+  <h2 class="heading">Anatomie eines <span class="accent">Skills</span></h2>
+  <div class="tree-detailed">
+    <div><span class="root">meta-ads-copy/</span></div>
+    <div><span class="branch">├── </span><span class="file-name">SKILL.md</span> <span class="comment">// pflicht</span></div>
+    <div><span class="branch">├── </span><span class="folder-name">references/</span> <span class="comment">// optional, für Details</span></div>
+    <div><span class="branch">└── </span><span class="folder-name">scripts/</span> <span class="comment">// optional, für Code</span></div>
+  </div>
+</div>
+
+<!-- ============ Slide 6: User vs Project Scope ============ -->
+<div class="slide" id="slide-6">
+  <h2 class="heading">User Scope <span class="accent">vs</span> Project Scope</h2>
+  <div class="scope-grid">
+    <div class="scope-col user-scope">
+      <div class="scope-label">USER SCOPE</div>
+      <div class="scope-title">In allen Projekten</div>
+      <div class="scope-path">~/.claude/skills/</div>
+      <div class="scope-where">Liegt in deinem <strong>Home-Ordner</strong>.<br>Skill ist überall verfügbar.</div>
+    </div>
+    <div class="scope-col project-scope">
+      <div class="scope-label">PROJECT SCOPE</div>
+      <div class="scope-title">Nur in diesem Projekt</div>
+      <div class="scope-path">mein-shop/.claude/skills/</div>
+      <div class="scope-where">Liegt im <strong>Projekt-Ordner</strong>.<br>Skill nur dort verfügbar.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Slide 7: So machst du ihn besser ============ -->
+<div class="slide" id="slide-7">
+  <h2 class="heading">So machst du ihn <span class="accent">besser</span></h2>
+  <div class="loop-circle">
+    <svg viewBox="0 0 720 720" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="loop-glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      <!-- Background ring (continuous circle behind boxes) -->
+      <circle cx="360" cy="360" r="240" fill="none" stroke="#2EA3A5" stroke-width="2.5" stroke-opacity="0.45" filter="url(#loop-glow)"/>
+      <!-- Direction chevrons at 45° offsets (between boxes), pointing clockwise -->
+      <g fill="#2EA3A5" filter="url(#loop-glow)">
+        <path d="M -10 -8 L 10 0 L -10 8 L -4 0 z" transform="translate(530 190) rotate(45)"/>
+        <path d="M -10 -8 L 10 0 L -10 8 L -4 0 z" transform="translate(530 530) rotate(135)"/>
+        <path d="M -10 -8 L 10 0 L -10 8 L -4 0 z" transform="translate(190 530) rotate(225)"/>
+        <path d="M -10 -8 L 10 0 L -10 8 L -4 0 z" transform="translate(190 190) rotate(315)"/>
+      </g>
+    </svg>
+    <div class="loop-step pos-top">
+      <div class="step-num">01</div>
+      <div class="step-title">Skill nutzen</div>
+    </div>
+    <div class="loop-step pos-right">
+      <div class="step-num">02</div>
+      <div class="step-title">Fehler bemerken</div>
+    </div>
+    <div class="loop-step pos-bottom">
+      <div class="step-num">03</div>
+      <div class="step-title">Feedback geben</div>
+    </div>
+    <div class="loop-step pos-left">
+      <div class="step-num">04</div>
+      <div class="step-title">Skill speichern</div>
+    </div>
+  </div>
+</div>
+
+<div class="counter" id="counter"></div>
+<script>
+let current = 0;
+const slides = document.querySelectorAll('.slide');
+const counter = document.getElementById('counter');
+function show(n) {
+  if (n < 0 || n >= slides.length) return;
+  slides[current].classList.remove('active');
+  current = n;
+  slides[current].classList.add('active');
+  counter.textContent = (current + 1) + ' / ' + slides.length;
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); show(current - 1); }
+});
+show(0);
+</script>
+</body>
+</html>
